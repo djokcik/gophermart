@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/djokcik/gophermart/internal"
+	"github.com/djokcik/gophermart/internal/config"
 	"github.com/djokcik/gophermart/internal/handler"
 	"github.com/djokcik/gophermart/internal/model"
 	"github.com/djokcik/gophermart/internal/storage"
@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-func UserContext(userRepo storage.UserRepository, cfg internal.Config) func(next http.Handler) http.Handler {
+func UserContext(userRepo storage.UserRepository, cfg config.Config) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()

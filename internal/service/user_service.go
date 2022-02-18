@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"errors"
-	"github.com/djokcik/gophermart/internal"
+	"github.com/djokcik/gophermart/internal/config"
 	"github.com/djokcik/gophermart/internal/model"
 	"github.com/djokcik/gophermart/internal/storage"
 	"github.com/djokcik/gophermart/pkg/encrypt"
@@ -21,12 +21,12 @@ type UserService interface {
 	GenerateToken(ctx context.Context, user model.User) (string, error)
 }
 
-func NewUserService(cfg internal.Config, repo storage.UserRepository) UserService {
+func NewUserService(cfg config.Config, repo storage.UserRepository) UserService {
 	return &userService{cfg: cfg, repo: repo}
 }
 
 type userService struct {
-	cfg  internal.Config
+	cfg  config.Config
 	repo storage.UserRepository
 }
 

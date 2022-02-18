@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/djokcik/gophermart/internal"
+	"github.com/djokcik/gophermart/internal/config"
 	"github.com/djokcik/gophermart/internal/handler"
 	"github.com/djokcik/gophermart/internal/reporegistry"
 	"github.com/djokcik/gophermart/pkg/logging"
@@ -11,7 +11,7 @@ import (
 	"os"
 )
 
-func makeMetricRoutes(ctx context.Context, mux *chi.Mux, cfg internal.Config) *handler.Handler {
+func makeMetricRoutes(ctx context.Context, mux *chi.Mux, cfg config.Config) *handler.Handler {
 	repoRegistry, err := reporegistry.NewPostgreSQL(ctx, cfg)
 	if err != nil {
 		logging.NewLogger().Fatal().Err(err).Msgf("Doesn`t open database connection")
@@ -27,6 +27,7 @@ func makeMetricRoutes(ctx context.Context, mux *chi.Mux, cfg internal.Config) *h
 		r.Route("/", func(r chi.Router) {
 			r.Use(middleware.UserContext(repoRegistry.GetUserRepo(), cfg))
 
+			r.Post("/orders", h.OrdersHandler())
 		})
 	})
 

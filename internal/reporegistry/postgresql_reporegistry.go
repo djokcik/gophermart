@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/djokcik/gophermart/internal"
+	"github.com/djokcik/gophermart/internal/config"
 	"github.com/djokcik/gophermart/internal/storage"
 	"github.com/djokcik/gophermart/internal/storage/psql"
 	"github.com/djokcik/gophermart/pkg/logging"
@@ -22,13 +22,14 @@ import (
 // RepoRegistry .
 type RepoRegistry interface {
 	GetUserRepo() storage.UserRepository
+	GetOrderRepo() storage.OrderRepository
 }
 
 type postgresqlRepoRegistry struct {
 	db *sql.DB
 }
 
-func NewPostgreSQL(ctx context.Context, cfg internal.Config) (RepoRegistry, error) {
+func NewPostgreSQL(ctx context.Context, cfg config.Config) (RepoRegistry, error) {
 	err := autoMigrate(ctx, "file://internal/storage/psql/migrations", cfg)
 	if err != nil {
 		return nil, err
@@ -42,7 +43,7 @@ func NewPostgreSQL(ctx context.Context, cfg internal.Config) (RepoRegistry, erro
 	return &postgresqlRepoRegistry{db: db}, nil
 }
 
-func autoMigrate(ctx context.Context, path string, cfg internal.Config) error {
+func autoMigrate(ctx context.Context, path string, cfg config.Config) error {
 	_, logger := logging.GetCtxLogger(ctx)
 
 	m, err := migrate.New(path, cfg.DatabaseUri)
@@ -59,7 +60,7 @@ func autoMigrate(ctx context.Context, path string, cfg internal.Config) error {
 	return nil
 }
 
-func open(ctx context.Context, cfg internal.Config) (*sql.DB, error) {
+func open(ctx context.Context, cfg config.Config) (*sql.DB, error) {
 	_, logger := logging.GetCtxLogger(ctx)
 
 	db, err := sql.Open("pgx", cfg.DatabaseUri)
@@ -73,4 +74,8 @@ func open(ctx context.Context, cfg internal.Config) (*sql.DB, error) {
 
 func (r postgresqlRepoRegistry) GetUserRepo() storage.UserRepository {
 	return psql.NewUserRepository(r.db)
+}
+
+func (r postgresqlRepoRegistry) GetOrderRepo() storage.OrderRepository {
+	return psql.NewOrderRepository(r.db)
 }

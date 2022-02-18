@@ -2,7 +2,7 @@ package handler
 
 import (
 	"context"
-	"github.com/djokcik/gophermart/internal"
+	"github.com/djokcik/gophermart/internal/config"
 	"github.com/djokcik/gophermart/internal/reporegistry"
 	"github.com/djokcik/gophermart/internal/service"
 	"github.com/djokcik/gophermart/pkg/logging"
@@ -16,13 +16,15 @@ var (
 
 type Handler struct {
 	*chi.Mux
-	user service.UserService
+	user  service.UserService
+	order service.OrderService
 }
 
-func NewHandler(mux *chi.Mux, cfg internal.Config, repoRegistry reporegistry.RepoRegistry) *Handler {
+func NewHandler(mux *chi.Mux, cfg config.Config, repoRegistry reporegistry.RepoRegistry) *Handler {
 	return &Handler{
-		Mux:  mux,
-		user: service.NewUserService(cfg, repoRegistry.GetUserRepo()),
+		Mux:   mux,
+		user:  service.NewUserService(cfg, repoRegistry.GetUserRepo()),
+		order: service.NewOrderService(cfg, repoRegistry.GetOrderRepo()),
 	}
 }
 

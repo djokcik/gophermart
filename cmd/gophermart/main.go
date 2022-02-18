@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/djokcik/gophermart/internal"
+	"github.com/djokcik/gophermart/internal/config"
 	"github.com/djokcik/gophermart/pkg/logging"
 	serverMiddleware "github.com/djokcik/gophermart/pkg/middleware"
 	"github.com/go-chi/chi/v5"
@@ -16,7 +16,7 @@ import (
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	cfg := internal.NewConfig()
+	cfg := config.NewConfig()
 
 	logging.
 		NewLogger().
