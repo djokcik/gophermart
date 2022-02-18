@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"github.com/djokcik/gophermart/pkg/luhn"
 	"time"
 )
@@ -14,15 +15,16 @@ const (
 )
 
 type (
-	Status  string
-	OrderId string
+	Status       string
+	OrderId      string
+	UploadedTime time.Time
 
 	Order struct {
-		Id         OrderId   `json:"order"`
-		UserId     int       `json:"-"`
-		Status     Status    `json:"status"`
-		UploadedAt time.Time `json:"uploaded_at"`
-		Accrual    int       `json:"accrual,omitempty"`
+		Id         OrderId      `json:"number"`
+		UserId     int          `json:"-"`
+		Status     Status       `json:"status"`
+		UploadedAt UploadedTime `json:"uploaded_at"`
+		Accrual    int          `json:"accrual,omitempty"`
 	}
 )
 
@@ -36,4 +38,14 @@ func (s Status) Valid() bool {
 
 func (o OrderId) Valid() bool {
 	return luhn.Validate(string(o))
+}
+
+// MarshalJSON реализует интерфейс json.Marshaler.
+func (s UploadedTime) MarshalJSON() ([]byte, error) {
+	return json.Marshal(time.Time(s).Format(time.RFC3339))
+}
+
+// UnmarshalJSON реализует интерфейс json.Unmarshaler.
+func (s *UploadedTime) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &s)
 }

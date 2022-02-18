@@ -15,6 +15,7 @@ import (
 
 type OrderService interface {
 	ProcessOrder(ctx context.Context, orderId model.OrderId) error
+	FindOrdersByUser(ctx context.Context, userId int) ([]model.Order, error)
 }
 
 func NewOrderService(cfg config.Config, repo storage.OrderRepository) OrderService {
@@ -24,6 +25,16 @@ func NewOrderService(cfg config.Config, repo storage.OrderRepository) OrderServi
 type orderService struct {
 	cfg  config.Config
 	repo storage.OrderRepository
+}
+
+func (o orderService) FindOrdersByUser(ctx context.Context, userId int) ([]model.Order, error) {
+	orders, err := o.repo.FindOrdersByUserId(ctx, userId)
+	if err != nil {
+		o.Log(ctx).Err(err).Msg("")
+		return nil, err
+	}
+
+	return orders, nil
 }
 
 func (o orderService) ProcessOrder(ctx context.Context, orderId model.OrderId) error {

@@ -18,6 +18,29 @@ type orderRepository struct {
 	db *sql.DB
 }
 
+func (r orderRepository) FindOrdersByUserId(ctx context.Context, userId int) ([]model.Order, error) {
+	rows, err := r.db.QueryContext(ctx, `SELECT id, status, uploaded_at, accrual 
+		from orders WHERE user_id = $1 ORDER BY uploaded_at`, userId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	orders := make([]model.Order, 0)
+	for rows.Next() {
+		order := model.Order{UserId: userId}
+		err = rows.Scan(&order.Id, &order.Status, &order.UploadedAt, &order.Accrual)
+		if err != nil {
+			return nil, err
+		}
+
+		orders = append(orders, order)
+	}
+
+	return orders, nil
+}
+
 func (r orderRepository) CreateOrder(ctx context.Context, order model.Order) error {
 	_, err := r.db.ExecContext(
 		ctx,

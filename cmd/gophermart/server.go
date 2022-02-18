@@ -27,7 +27,8 @@ func makeMetricRoutes(ctx context.Context, mux *chi.Mux, cfg config.Config) *han
 		r.Route("/", func(r chi.Router) {
 			r.Use(middleware.UserContext(repoRegistry.GetUserRepo(), cfg))
 
-			r.Post("/orders", h.OrdersHandler())
+			r.Post("/orders", h.UploadOrderHandler())
+			r.Get("/orders", h.GetOrdersHandler())
 		})
 	})
 

@@ -17,6 +17,7 @@ type UserRepository interface {
 type OrderRepository interface {
 	FindOrderById(ctx context.Context, id model.OrderId) (model.Order, error)
 	CreateOrder(ctx context.Context, order model.Order) error
+	FindOrdersByUserId(ctx context.Context, userId int) ([]model.Order, error)
 }
 
 var (
