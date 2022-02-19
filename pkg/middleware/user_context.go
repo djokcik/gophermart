@@ -45,9 +45,9 @@ func UserContext(userRepo storage.UserRepository, cfg config.Config) func(next h
 				return
 			}
 
-			user, err := userRepo.UserById(ctx, id)
+			user, err := userRepo.UserByID(ctx, id)
 			if err != nil {
-				logger.Trace().Err(err).Msgf("RequireUser: user with id %s not found", id)
+				logger.Trace().Err(err).Msgf("RequireUser: user with id %d not found", id)
 				http.Error(rw, "Unauthorized", http.StatusUnauthorized)
 
 				return

@@ -21,8 +21,8 @@ type accrualClient struct {
 	client         httpClient
 }
 
-func (o accrualClient) GetOrder(ctx context.Context, orderId model.OrderId) (AccrualResponse, error) {
-	url := fmt.Sprintf("%s/api/orders/%s", o.accrualAddress, orderId)
+func (o accrualClient) GetOrder(ctx context.Context, orderID model.OrderID) (AccrualResponse, error) {
+	url := fmt.Sprintf("%s/api/orders/%s", o.accrualAddress, orderID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		o.Log(ctx).Error().Err(err).Msg("request was interrupted")

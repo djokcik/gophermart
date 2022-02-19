@@ -24,18 +24,18 @@ func (h *Handler) UploadOrderHandler() http.HandlerFunc {
 			return
 		}
 
-		orderId := model.OrderId(body)
-		if !orderId.Valid() {
-			logger.Trace().Err(err).Msg("invalid orderId")
-			http.Error(rw, "invalid orderId", http.StatusUnprocessableEntity)
+		orderID := model.OrderID(body)
+		if !orderID.Valid() {
+			logger.Trace().Err(err).Msg("invalid orderID")
+			http.Error(rw, "invalid orderID", http.StatusUnprocessableEntity)
 			return
 		}
 
-		err = h.order.ProcessOrder(ctx, orderId)
+		err = h.order.ProcessOrder(ctx, orderID)
 		if err != nil {
 			if errors.Is(err, service.ErrOrderAlreadyUploadedAnotherUser) {
 				logger.Trace().Err(err).Msg("")
-				http.Error(rw, "invalid orderId", http.StatusConflict)
+				http.Error(rw, "invalid orderID", http.StatusConflict)
 				return
 			}
 
@@ -67,7 +67,7 @@ func (h *Handler) GetOrdersHandler() http.HandlerFunc {
 			return
 		}
 
-		orders, err := h.order.OrdersByUser(ctx, user.Id)
+		orders, err := h.order.OrdersByUser(ctx, user.ID)
 		if err != nil {
 			h.Log(ctx).Err(err).Msg("invalid find users")
 			http.Error(rw, "internal error", http.StatusInternalServerError)

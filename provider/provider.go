@@ -8,11 +8,11 @@ import (
 
 type (
 	AccrualClient interface {
-		GetOrder(ctx context.Context, orderId model.OrderId) (AccrualResponse, error)
+		GetOrder(ctx context.Context, orderID model.OrderID) (AccrualResponse, error)
 	}
 
 	AccrualResponse struct {
-		Order   model.OrderId `json:"order"`
+		Order   model.OrderID `json:"order"`
 		Status  model.Status  `json:"status"`
 		Accrual model.Amount  `json:"accrual"`
 	}

@@ -40,7 +40,7 @@ func (a accrualService) Poller(ctx context.Context) func() {
 }
 
 func (a accrualService) ProcessOrder(ctx context.Context, order model.Order) {
-	response, err := a.client.GetOrder(ctx, order.Id)
+	response, err := a.client.GetOrder(ctx, order.ID)
 	if err != nil {
 		var apiErr *provider.ErrAccrualResponse
 		if errors.As(err, &apiErr) {

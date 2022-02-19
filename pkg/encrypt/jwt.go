@@ -15,7 +15,7 @@ var (
 
 func CreateToken(secretKey string, id int) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, model.Claims{
-		Id: id,
+		ID: id,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 24 * 30).Unix(),
 			Issuer:    "gophermart",
@@ -38,7 +38,7 @@ func ParseToken(accessToken string, secretKey string) (int, error) {
 	}
 
 	if claims, ok := token.Claims.(*model.Claims); ok && token.Valid {
-		return claims.Id, nil
+		return claims.ID, nil
 	}
 
 	return 0, model.ErrInvalidAccessToken

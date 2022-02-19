@@ -27,9 +27,9 @@ func (h *Handler) WithdrawHandler() http.HandlerFunc {
 
 		err = withdrawDto.Validate()
 		if err != nil {
-			h.Log(ctx).Trace().Err(err).Msg("validate orderId")
-			if errors.Is(err, model.ErrInvalidOrderId) {
-				http.Error(rw, "invalid orderId", http.StatusUnprocessableEntity)
+			h.Log(ctx).Trace().Err(err).Msg("validate orderID")
+			if errors.Is(err, model.ErrInvalidOrderID) {
+				http.Error(rw, "invalid orderID", http.StatusUnprocessableEntity)
 				return
 			}
 
@@ -45,7 +45,7 @@ func (h *Handler) WithdrawHandler() http.HandlerFunc {
 			return
 		}
 
-		err = h.withdraw.ProcessWithdraw(ctx, withdrawDto.Order, withdrawDto.Sum)
+		err = h.withdraw.ProcessWithdraw(ctx, withdrawDto.OrderID, withdrawDto.Sum)
 		if err != nil {
 			if errors.Is(err, storage.ErrInsufficientFunds) {
 				h.Log(ctx).Trace().Err(storage.ErrInsufficientFunds).Msg("WithdrawHandler:")
@@ -77,7 +77,7 @@ func (h *Handler) WithdrawLogsHandler() http.HandlerFunc {
 			return
 		}
 
-		withdrawLogs, err := h.withdraw.WithdrawLogsByUserId(ctx, user.Id)
+		withdrawLogs, err := h.withdraw.WithdrawLogsByUserID(ctx, user.ID)
 		if err != nil {
 			h.Log(ctx).Err(err).Msg("invalid find users")
 			http.Error(rw, "internal error", http.StatusInternalServerError)

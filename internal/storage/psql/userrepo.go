@@ -39,7 +39,7 @@ func (r userRepository) UserByUsername(ctx context.Context, username string) (mo
 	row := r.db.QueryRowContext(ctx, "SELECT id, password, created_at, balance from users where username=$1", username)
 
 	user := model.User{Username: username}
-	err := row.Scan(&user.Id, &user.Password, &user.CreatedAt, &user.Balance)
+	err := row.Scan(&user.ID, &user.Password, &user.CreatedAt, &user.Balance)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return model.User{}, storage.ErrNotFound
@@ -51,10 +51,10 @@ func (r userRepository) UserByUsername(ctx context.Context, username string) (mo
 	return user, nil
 }
 
-func (r userRepository) UserById(ctx context.Context, id int) (model.User, error) {
+func (r userRepository) UserByID(ctx context.Context, id int) (model.User, error) {
 	row := r.db.QueryRowContext(ctx, "SELECT username, password, created_at, balance from users where id=$1", id)
 
-	user := model.User{Id: id}
+	user := model.User{ID: id}
 	err := row.Scan(&user.Username, &user.Password, &user.CreatedAt, &user.Balance)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

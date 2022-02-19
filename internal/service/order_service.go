@@ -16,8 +16,8 @@ import (
 //go:generate mockery --name=OrderService
 
 type OrderService interface {
-	ProcessOrder(ctx context.Context, orderId model.OrderId) error
-	OrdersByUser(ctx context.Context, userId int) ([]model.Order, error)
+	ProcessOrder(ctx context.Context, orderID model.OrderID) error
+	OrdersByUser(ctx context.Context, userID int) ([]model.Order, error)
 	OrdersByStatus(ctx context.Context, status model.Status) ([]model.Order, error)
 	UpdateForAccrual(ctx context.Context, order model.Order, accrual provider.AccrualResponse) error
 }
@@ -45,8 +45,8 @@ func (o orderService) OrdersByStatus(ctx context.Context, status model.Status) (
 	return orders, nil
 }
 
-func (o orderService) OrdersByUser(ctx context.Context, userId int) ([]model.Order, error) {
-	orders, err := o.repo.OrdersByUserId(ctx, userId)
+func (o orderService) OrdersByUser(ctx context.Context, userID int) ([]model.Order, error) {
+	orders, err := o.repo.OrdersByUserID(ctx, userID)
 	if err != nil {
 		o.Log(ctx).Err(err).Msg("OrdersByUser:")
 		return nil, err
@@ -55,16 +55,16 @@ func (o orderService) OrdersByUser(ctx context.Context, userId int) ([]model.Ord
 	return orders, nil
 }
 
-func (o orderService) ProcessOrder(ctx context.Context, orderId model.OrderId) error {
+func (o orderService) ProcessOrder(ctx context.Context, orderID model.OrderID) error {
 	user := appContext.User(ctx)
 	if user == nil {
 		o.Log(ctx).Err(ErrNotAuthenticated).Msg("")
 		return ErrNotAuthenticated
 	}
 
-	order, err := o.repo.OrderById(ctx, orderId)
+	order, err := o.repo.OrderByID(ctx, orderID)
 	if err == nil {
-		if user.Id == order.UserId {
+		if user.ID == order.UserID {
 			o.Log(ctx).Trace().Err(ErrOrderAlreadyUploaded).Msg("")
 			return ErrOrderAlreadyUploaded
 		}
@@ -79,8 +79,8 @@ func (o orderService) ProcessOrder(ctx context.Context, orderId model.OrderId) e
 	}
 
 	order = model.Order{
-		Id:      orderId,
-		UserId:  user.Id,
+		ID:      orderID,
+		UserID:  user.ID,
 		Status:  model.StatusNew,
 		Accrual: 0,
 	}
@@ -92,7 +92,7 @@ func (o orderService) ProcessOrder(ctx context.Context, orderId model.OrderId) e
 	}
 
 	o.Log(ctx).Trace().
-		Str("orderId", string(orderId)).
+		Str("orderID", string(orderID)).
 		Msg("success order stored in DB")
 
 	return nil

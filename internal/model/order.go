@@ -15,13 +15,13 @@ const (
 
 type (
 	Status       string
-	OrderId      string
+	OrderID      string
 	UploadedTime time.Time
 	Amount       int
 
 	Order struct {
-		Id         OrderId      `json:"number"`
-		UserId     int          `json:"-"`
+		ID         OrderID      `json:"number"`
+		UserID     int          `json:"-"`
 		Status     Status       `json:"status"`
 		UploadedAt UploadedTime `json:"uploaded_at"`
 		Accrual    Amount       `json:"accrual,omitempty"`
@@ -35,7 +35,7 @@ func (s Status) Valid() bool {
 		s == StatusInvalid
 }
 
-func (o OrderId) Valid() bool {
+func (o OrderID) Valid() bool {
 	return luhn.Validate(string(o))
 }
 

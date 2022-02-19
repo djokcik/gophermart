@@ -11,7 +11,7 @@ var ErrInvalidAccessToken = errors.New("invalid auth token")
 type (
 	Claims struct {
 		jwt.StandardClaims
-		Id int
+		ID int
 	}
 
 	UserRequestDto struct {
@@ -24,7 +24,7 @@ type (
 	}
 
 	User struct {
-		Id        int       `json:"id"`
+		ID        int       `json:"id"`
 		Username  string    `json:"username"`
 		CreatedAt time.Time `json:"createdAt"`
 		Balance   Amount    `json:"balance"`

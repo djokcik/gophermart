@@ -47,7 +47,7 @@ func NewPostgreSQL(ctx context.Context, cfg config.Config) (RepoRegistry, error)
 func autoMigrate(ctx context.Context, path string, cfg config.Config) error {
 	_, logger := logging.GetCtxLogger(ctx)
 
-	m, err := migrate.New(path, cfg.DatabaseUri)
+	m, err := migrate.New(path, cfg.DatabaseURI)
 	if err != nil {
 		return fmt.Errorf("psql: autoMigrate: %w", err)
 	}
@@ -64,7 +64,7 @@ func autoMigrate(ctx context.Context, path string, cfg config.Config) error {
 func open(ctx context.Context, cfg config.Config) (*sql.DB, error) {
 	_, logger := logging.GetCtxLogger(ctx)
 
-	db, err := sql.Open("pgx", cfg.DatabaseUri)
+	db, err := sql.Open("pgx", cfg.DatabaseURI)
 	if err != nil {
 		logger.Fatal().Err(err).Msgf("Unable to connect to database")
 		return nil, err

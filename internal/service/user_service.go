@@ -34,7 +34,7 @@ type userService struct {
 }
 
 func (u userService) GetBalance(ctx context.Context, user model.User) (model.UserBalance, error) {
-	withdrawAmount, err := u.withdrawRepo.AmountWithdrawByUser(ctx, user.Id)
+	withdrawAmount, err := u.withdrawRepo.AmountWithdrawByUser(ctx, user.ID)
 	if err != nil {
 		u.Log(ctx).Error().Err(err).Msg("GetBalance:")
 		return model.UserBalance{}, nil
@@ -108,7 +108,7 @@ func (u userService) GetUserByUsername(ctx context.Context, username string) (mo
 }
 
 func (u userService) GenerateToken(ctx context.Context, user model.User) (string, error) {
-	token, err := encrypt.CreateToken(u.cfg.Key, user.Id)
+	token, err := encrypt.CreateToken(u.cfg.Key, user.ID)
 	if err != nil {
 		u.Log(ctx).Err(err).Msgf("error create token")
 		return "", err

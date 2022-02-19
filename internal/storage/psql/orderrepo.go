@@ -31,12 +31,17 @@ func (r orderRepository) OrdersByStatus(ctx context.Context, status model.Status
 	orders := make([]model.Order, 0)
 	for rows.Next() {
 		order := model.Order{Status: status}
-		err = rows.Scan(&order.Id, &order.UserId, &order.UploadedAt, &order.Accrual)
+		err = rows.Scan(&order.ID, &order.UserID, &order.UploadedAt, &order.Accrual)
 		if err != nil {
 			return nil, err
 		}
 
 		orders = append(orders, order)
+	}
+
+	if rows.Err() != nil {
+		r.Log(ctx).Error().Err(err).Msg("OrdersByStatus: query rows was error")
+		return nil, err
 	}
 
 	return orders, nil
@@ -50,7 +55,7 @@ func (r orderRepository) UpdateForAccrual(ctx context.Context, order model.Order
 	}
 
 	_, err = tx.ExecContext(ctx, `UPDATE orders SET status = $1, accrual = $2 
-			WHERE id = $3`, accrual.Status, accrual.Accrual, order.Id)
+			WHERE id = $3`, accrual.Status, accrual.Accrual, order.ID)
 	if err != nil {
 		r.Log(ctx).Error().Err(err).Msg("UpdateForAccrual: exec orders")
 		if err = tx.Rollback(); err != nil {
@@ -60,7 +65,7 @@ func (r orderRepository) UpdateForAccrual(ctx context.Context, order model.Order
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, `UPDATE users SET balance = balance + $1 WHERE id = $2`, accrual.Accrual, order.UserId)
+	_, err = tx.ExecContext(ctx, `UPDATE users SET balance = balance + $1 WHERE id = $2`, accrual.Accrual, order.UserID)
 	if err != nil {
 		r.Log(ctx).Error().Err(err).Msg("UpdateForAccrual: exec users")
 		if err = tx.Rollback(); err != nil {
@@ -78,9 +83,9 @@ func (r orderRepository) UpdateForAccrual(ctx context.Context, order model.Order
 	return nil
 }
 
-func (r orderRepository) OrdersByUserId(ctx context.Context, userId int) ([]model.Order, error) {
+func (r orderRepository) OrdersByUserID(ctx context.Context, userID int) ([]model.Order, error) {
 	rows, err := r.db.QueryContext(ctx, `SELECT id, status, uploaded_at, accrual 
-		from orders WHERE user_id = $1 ORDER BY uploaded_at`, userId)
+		from orders WHERE user_id = $1 ORDER BY uploaded_at`, userID)
 
 	if err != nil {
 		return nil, err
@@ -89,13 +94,18 @@ func (r orderRepository) OrdersByUserId(ctx context.Context, userId int) ([]mode
 
 	orders := make([]model.Order, 0)
 	for rows.Next() {
-		order := model.Order{UserId: userId}
-		err = rows.Scan(&order.Id, &order.Status, &order.UploadedAt, &order.Accrual)
+		order := model.Order{UserID: userID}
+		err = rows.Scan(&order.ID, &order.Status, &order.UploadedAt, &order.Accrual)
 		if err != nil {
 			return nil, err
 		}
 
 		orders = append(orders, order)
+	}
+
+	if rows.Err() != nil {
+		r.Log(ctx).Error().Err(err).Msg("OrdersByUserID: query rows was error")
+		return nil, err
 	}
 
 	return orders, nil
@@ -105,8 +115,8 @@ func (r orderRepository) CreateOrder(ctx context.Context, order model.Order) err
 	_, err := r.db.ExecContext(
 		ctx,
 		"INSERT INTO orders (id, user_id, status, accrual) VALUES ($1, $2, $3, $4)",
-		order.Id,
-		order.UserId,
+		order.ID,
+		order.UserID,
 		order.Status,
 		order.Accrual,
 	)
@@ -119,15 +129,15 @@ func (r orderRepository) CreateOrder(ctx context.Context, order model.Order) err
 	return err
 }
 
-func (r orderRepository) OrderById(ctx context.Context, orderId model.OrderId) (model.Order, error) {
+func (r orderRepository) OrderByID(ctx context.Context, orderID model.OrderID) (model.Order, error) {
 	row := r.db.QueryRowContext(
 		ctx,
 		"SELECT user_id, status, uploaded_at, accrual from orders where id=$1",
-		orderId,
+		orderID,
 	)
 
-	order := model.Order{Id: orderId}
-	err := row.Scan(&order.UserId, &order.Status, &order.UploadedAt, &order.Accrual)
+	order := model.Order{ID: orderID}
+	err := row.Scan(&order.UserID, &order.Status, &order.UploadedAt, &order.Accrual)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return model.Order{}, storage.ErrNotFound

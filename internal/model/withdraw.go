@@ -6,27 +6,27 @@ import (
 )
 
 var (
-	ErrInvalidOrderId = errors.New("service: invalid orderId")
+	ErrInvalidOrderID = errors.New("service: invalid orderID")
 )
 
 type (
 	WithdrawRequestDto struct {
-		Order OrderId `json:"order"`
-		Sum   Amount  `json:"sum"`
+		OrderID OrderID `json:"order"`
+		Sum     Amount  `json:"sum"`
 	}
 
 	Withdraw struct {
-		Id          int       `json:"-"`
-		OrderId     OrderId   `json:"order"`
+		ID          int       `json:"-"`
+		OrderID     OrderID   `json:"order"`
 		Sum         Amount    `json:"sum"`
 		ProcessedAt time.Time `json:"processed_at"`
-		UserId      int       `json:"-"`
+		UserID      int       `json:"-"`
 	}
 )
 
 func (w WithdrawRequestDto) Validate() error {
-	if !w.Order.Valid() {
-		return ErrInvalidOrderId
+	if !w.OrderID.Valid() {
+		return ErrInvalidOrderID
 	}
 
 	if w.Sum <= 0 {

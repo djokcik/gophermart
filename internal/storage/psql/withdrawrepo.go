@@ -18,8 +18,8 @@ type withdrawRepository struct {
 	db *sql.DB
 }
 
-func (r withdrawRepository) AmountWithdrawByUser(ctx context.Context, userId int) (model.Amount, error) {
-	row := r.db.QueryRow("SELECT SUM(sum) as amount from withdraw_log GROUP BY user_id")
+func (r withdrawRepository) AmountWithdrawByUser(ctx context.Context, userID int) (model.Amount, error) {
+	row := r.db.QueryRow("SELECT SUM(sum) as amount from withdraw_log GROUP BY user_id = $1", userID)
 
 	var amount model.Amount
 	err := row.Scan(&amount)
@@ -42,7 +42,7 @@ func (r withdrawRepository) ProcessWithdraw(ctx context.Context, withdraw model.
 		return err
 	}
 
-	row := tx.QueryRow("SELECT balance FROM users where id = $1", withdraw.UserId)
+	row := tx.QueryRow("SELECT balance FROM users where id = $1", withdraw.UserID)
 	var balance model.Amount
 	if err = row.Scan(&balance); err != nil {
 		return err
@@ -58,7 +58,7 @@ func (r withdrawRepository) ProcessWithdraw(ctx context.Context, withdraw model.
 	}
 
 	if _, err = tx.ExecContext(ctx, `INSERT INTO withdraw_log (user_id, sum, order_id) VALUES ($1, $2, $3)`,
-		withdraw.UserId, withdraw.Sum, withdraw.OrderId); err != nil {
+		withdraw.UserID, withdraw.Sum, withdraw.OrderID); err != nil {
 		r.Log(ctx).Error().Err(err).Msg("ProcessWithdraw: exec withdraw_log")
 		if err = tx.Rollback(); err != nil {
 			r.Log(ctx).Error().Err(err).Msgf("ProcessWithdraw: unable to rollback")
@@ -67,7 +67,7 @@ func (r withdrawRepository) ProcessWithdraw(ctx context.Context, withdraw model.
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, `UPDATE users SET balance = balance - $1 WHERE id = $2`, withdraw.Sum, withdraw.UserId)
+	_, err = tx.ExecContext(ctx, `UPDATE users SET balance = balance - $1 WHERE id = $2`, withdraw.Sum, withdraw.UserID)
 	if err != nil {
 		r.Log(ctx).Error().Err(err).Msg("ProcessWithdraw: exec users")
 		if err = tx.Rollback(); err != nil {
@@ -85,9 +85,9 @@ func (r withdrawRepository) ProcessWithdraw(ctx context.Context, withdraw model.
 	return nil
 }
 
-func (r withdrawRepository) WithdrawLogsByUserId(ctx context.Context, userId int) ([]model.Withdraw, error) {
+func (r withdrawRepository) WithdrawLogsByUserID(ctx context.Context, userID int) ([]model.Withdraw, error) {
 	rows, err := r.db.QueryContext(ctx, `SELECT id, sum, processed_at, order_id 
-		from withdraw_log WHERE user_id = $1 ORDER BY processed_at`, userId)
+		from withdraw_log WHERE user_id = $1 ORDER BY processed_at`, userID)
 
 	if err != nil {
 		return nil, err
@@ -96,13 +96,18 @@ func (r withdrawRepository) WithdrawLogsByUserId(ctx context.Context, userId int
 
 	withdrawLogs := make([]model.Withdraw, 0)
 	for rows.Next() {
-		withdrawLog := model.Withdraw{UserId: userId}
-		err = rows.Scan(&withdrawLog.Id, &withdrawLog.Sum, &withdrawLog.ProcessedAt, &withdrawLog.OrderId)
+		withdrawLog := model.Withdraw{UserID: userID}
+		err = rows.Scan(&withdrawLog.ID, &withdrawLog.Sum, &withdrawLog.ProcessedAt, &withdrawLog.OrderID)
 		if err != nil {
 			return nil, err
 		}
 
 		withdrawLogs = append(withdrawLogs, withdrawLog)
+	}
+
+	if rows.Err() != nil {
+		r.Log(ctx).Error().Err(err).Msg("WithdrawLogsByUserID: query rows was error")
+		return nil, err
 	}
 
 	return withdrawLogs, nil

@@ -14,9 +14,9 @@ import (
 //go:generate mockery --name=WithdrawService
 
 type WithdrawService interface {
-	ProcessWithdraw(ctx context.Context, orderId model.OrderId, sum model.Amount) error
-	WithdrawLogsByUserId(ctx context.Context, userId int) ([]model.Withdraw, error)
-	AmountWithdrawByUser(ctx context.Context, userId int) (model.Amount, error)
+	ProcessWithdraw(ctx context.Context, orderID model.OrderID, sum model.Amount) error
+	WithdrawLogsByUserID(ctx context.Context, userID int) ([]model.Withdraw, error)
+	AmountWithdrawByUser(ctx context.Context, userID int) (model.Amount, error)
 }
 
 func NewWithdrawService(cfg config.Config, registry reporegistry.RepoRegistry) WithdrawService {
@@ -28,8 +28,8 @@ type withdrawService struct {
 	repo storage.WithdrawRepository
 }
 
-func (o withdrawService) AmountWithdrawByUser(ctx context.Context, userId int) (model.Amount, error) {
-	amount, err := o.repo.AmountWithdrawByUser(ctx, userId)
+func (o withdrawService) AmountWithdrawByUser(ctx context.Context, userID int) (model.Amount, error) {
+	amount, err := o.repo.AmountWithdrawByUser(ctx, userID)
 	if err != nil {
 		o.Log(ctx).Error().Err(err).Msg("AmountWithdrawByUser:")
 		return 0, err
@@ -38,24 +38,24 @@ func (o withdrawService) AmountWithdrawByUser(ctx context.Context, userId int) (
 	return amount, nil
 }
 
-func (o withdrawService) WithdrawLogsByUserId(ctx context.Context, userId int) ([]model.Withdraw, error) {
-	withdrawLogs, err := o.repo.WithdrawLogsByUserId(ctx, userId)
+func (o withdrawService) WithdrawLogsByUserID(ctx context.Context, userID int) ([]model.Withdraw, error) {
+	withdrawLogs, err := o.repo.WithdrawLogsByUserID(ctx, userID)
 	if err != nil {
-		o.Log(ctx).Error().Err(err).Msg("WithdrawLogsByUserId:")
+		o.Log(ctx).Error().Err(err).Msg("WithdrawLogsByUserID:")
 		return nil, err
 	}
 
 	return withdrawLogs, nil
 }
 
-func (o withdrawService) ProcessWithdraw(ctx context.Context, orderId model.OrderId, sum model.Amount) error {
+func (o withdrawService) ProcessWithdraw(ctx context.Context, orderID model.OrderID, sum model.Amount) error {
 	user := appContext.User(ctx)
 	if user == nil {
 		o.Log(ctx).Err(ErrNotAuthenticated).Msg("")
 		return ErrNotAuthenticated
 	}
 
-	err := o.repo.ProcessWithdraw(ctx, model.Withdraw{OrderId: orderId, Sum: sum, UserId: user.Id})
+	err := o.repo.ProcessWithdraw(ctx, model.Withdraw{OrderID: orderID, Sum: sum, UserID: user.ID})
 	if err != nil {
 		o.Log(ctx).Warn().Err(err).Msg("ProcessWithdraw:")
 		return err
