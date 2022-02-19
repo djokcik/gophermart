@@ -22,6 +22,8 @@ func makeMetricRoutes(_ context.Context, mux *chi.Mux, cfg config.Config, regist
 			r.Post("/orders", h.UploadOrderHandler())
 			r.Get("/orders", h.GetOrdersHandler())
 			r.Get("/balance", h.GetBalanceHandler())
+			r.Post("/balance/withdraw", h.WithdrawHandler())
+			r.Get("/withdrawals", h.WithdrawLogsHandler())
 		})
 	})
 

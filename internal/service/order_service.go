@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/djokcik/gophermart/internal/config"
 	"github.com/djokcik/gophermart/internal/model"
+	"github.com/djokcik/gophermart/internal/reporegistry"
 	"github.com/djokcik/gophermart/internal/storage"
 	appContext "github.com/djokcik/gophermart/pkg/context"
 	"github.com/djokcik/gophermart/pkg/logging"
@@ -21,8 +22,8 @@ type OrderService interface {
 	UpdateForAccrual(ctx context.Context, order model.Order, accrual provider.AccrualResponse) error
 }
 
-func NewOrderService(cfg config.Config, repo storage.OrderRepository) OrderService {
-	return &orderService{cfg: cfg, repo: repo}
+func NewOrderService(cfg config.Config, registry reporegistry.RepoRegistry) OrderService {
+	return &orderService{cfg: cfg, repo: registry.GetOrderRepo()}
 }
 
 type orderService struct {

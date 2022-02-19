@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/djokcik/gophermart/internal/config"
 	"github.com/djokcik/gophermart/internal/model"
+	"github.com/djokcik/gophermart/internal/reporegistry"
 	"github.com/djokcik/gophermart/internal/storage"
 	"github.com/djokcik/gophermart/pkg/encrypt"
 	"github.com/djokcik/gophermart/pkg/logging"
@@ -22,17 +23,24 @@ type UserService interface {
 	GetBalance(ctx context.Context, user model.User) (model.UserBalance, error)
 }
 
-func NewUserService(cfg config.Config, repo storage.UserRepository) UserService {
-	return &userService{cfg: cfg, repo: repo}
+func NewUserService(cfg config.Config, registry reporegistry.RepoRegistry) UserService {
+	return &userService{cfg: cfg, repo: registry.GetUserRepo(), withdrawRepo: registry.GetWithdrawRepo()}
 }
 
 type userService struct {
-	cfg  config.Config
-	repo storage.UserRepository
+	cfg          config.Config
+	repo         storage.UserRepository
+	withdrawRepo storage.WithdrawRepository
 }
 
 func (u userService) GetBalance(ctx context.Context, user model.User) (model.UserBalance, error) {
-	return model.UserBalance{Current: user.Balance}, nil
+	withdrawAmount, err := u.withdrawRepo.AmountWithdrawByUser(ctx, user.Id)
+	if err != nil {
+		u.Log(ctx).Error().Err(err).Msg("GetBalance:")
+		return model.UserBalance{}, nil
+	}
+
+	return model.UserBalance{Current: user.Balance, Withdrawn: withdrawAmount}, nil
 }
 
 func (u userService) Authenticate(ctx context.Context, login string, password string) (string, error) {

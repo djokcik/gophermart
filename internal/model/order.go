@@ -17,14 +17,14 @@ type (
 	Status       string
 	OrderId      string
 	UploadedTime time.Time
-	Accrual      int
+	Amount       int
 
 	Order struct {
 		Id         OrderId      `json:"number"`
 		UserId     int          `json:"-"`
 		Status     Status       `json:"status"`
 		UploadedAt UploadedTime `json:"uploaded_at"`
-		Accrual    Accrual      `json:"accrual,omitempty"`
+		Accrual    Amount       `json:"accrual,omitempty"`
 	}
 )
 
@@ -50,12 +50,12 @@ func (s *UploadedTime) UnmarshalJSON(data []byte) error {
 }
 
 // MarshalJSON реализует интерфейс json.Marshaler.
-func (s Accrual) MarshalJSON() ([]byte, error) {
+func (s Amount) MarshalJSON() ([]byte, error) {
 	return json.Marshal(float64(s) / 100)
 }
 
 // UnmarshalJSON реализует интерфейс json.Unmarshaler.
-func (s *Accrual) UnmarshalJSON(data []byte) error {
+func (s *Amount) UnmarshalJSON(data []byte) error {
 	var val float64
 
 	err := json.Unmarshal(data, &val)
@@ -63,6 +63,6 @@ func (s *Accrual) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	*s = Accrual(val * 100)
+	*s = Amount(val * 100)
 	return nil
 }

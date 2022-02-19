@@ -16,15 +16,17 @@ var (
 
 type Handler struct {
 	*chi.Mux
-	user  service.UserService
-	order service.OrderService
+	user     service.UserService
+	order    service.OrderService
+	withdraw service.WithdrawService
 }
 
 func NewHandler(mux *chi.Mux, cfg config.Config, repoRegistry reporegistry.RepoRegistry) *Handler {
 	return &Handler{
-		Mux:   mux,
-		user:  service.NewUserService(cfg, repoRegistry.GetUserRepo()),
-		order: service.NewOrderService(cfg, repoRegistry.GetOrderRepo()),
+		Mux:      mux,
+		user:     service.NewUserService(cfg, repoRegistry),
+		order:    service.NewOrderService(cfg, repoRegistry),
+		withdraw: service.NewWithdrawService(cfg, repoRegistry),
 	}
 }
 

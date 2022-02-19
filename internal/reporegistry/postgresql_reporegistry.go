@@ -23,6 +23,7 @@ import (
 type RepoRegistry interface {
 	GetUserRepo() storage.UserRepository
 	GetOrderRepo() storage.OrderRepository
+	GetWithdrawRepo() storage.WithdrawRepository
 }
 
 type postgresqlRepoRegistry struct {
@@ -78,4 +79,8 @@ func (r postgresqlRepoRegistry) GetUserRepo() storage.UserRepository {
 
 func (r postgresqlRepoRegistry) GetOrderRepo() storage.OrderRepository {
 	return psql.NewOrderRepository(r.db)
+}
+
+func (r postgresqlRepoRegistry) GetWithdrawRepo() storage.WithdrawRepository {
+	return psql.NewWithdrawRepository(r.db)
 }

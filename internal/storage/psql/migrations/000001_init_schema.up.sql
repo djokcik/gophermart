@@ -10,8 +10,6 @@ BEGIN
     END IF;
 END$$;
 
-
-
 create table users
 (
     id serial not null,
@@ -46,3 +44,20 @@ create unique index orders_id_uindex
 alter table orders
     add constraint orders_pk
         primary key (id);
+
+create table withdraw_log
+(
+    id serial not null,
+    user_id int not null,
+    sum int default 0,
+    processed_at timestamp default current_timestamp,
+    order_id text
+);
+
+create unique index withdraw_log_id_uindex
+    on withdraw_log (id);
+
+alter table withdraw_log
+    add constraint withdraw_log_pk
+        primary key (id);
+

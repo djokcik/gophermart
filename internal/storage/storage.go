@@ -7,7 +7,9 @@ import (
 	"github.com/djokcik/gophermart/provider"
 )
 
+//go:generate mockery --name=UserRepository
 //go:generate mockery --name=OrderRepository
+//go:generate mockery --name=WithdrawRepository
 
 type UserRepository interface {
 	CreateUser(ctx context.Context, user model.User) error
@@ -23,15 +25,14 @@ type OrderRepository interface {
 	UpdateForAccrual(ctx context.Context, order model.Order, accrual provider.AccrualResponse) error
 }
 
+type WithdrawRepository interface {
+	ProcessWithdraw(ctx context.Context, withdraw model.Withdraw) error
+	WithdrawLogsByUserId(ctx context.Context, userId int) ([]model.Withdraw, error)
+	AmountWithdrawByUser(ctx context.Context, userId int) (model.Amount, error)
+}
+
 var (
 	ErrNotFound           = errors.New("storage: not found")
 	ErrLoginAlreadyExists = errors.New("storage: login already exists")
-	//
-	//ErrAlreadyProcessed = errors.New("storage: already processed")
-	//ErrInvalidStatus    = errors.New("storage: non-processed order has PROCESSED status")
-	//
-	//ErrInsufficientPoints = errors.New("storage: insufficient points to perform withdrawal operation")
-	//
-	//// ErrInvalidInput is threw when accrual or withdrawal amount less than zero.
-	//ErrInvalidInput = errors.New("storage: amount less than zero")
+	ErrInsufficientFunds  = errors.New("storage: insufficient funds")
 )

@@ -18,8 +18,8 @@ type AccrualService interface {
 func NewAccrualService(cfg config.Config, registry reporegistry.RepoRegistry) AccrualService {
 	return &accrualService{
 		client: provider.NewAccrualClient(cfg),
-		user:   NewUserService(cfg, registry.GetUserRepo()),
-		order:  NewOrderService(cfg, registry.GetOrderRepo()),
+		user:   NewUserService(cfg, registry),
+		order:  NewOrderService(cfg, registry),
 	}
 }
 

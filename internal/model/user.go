@@ -27,14 +27,14 @@ type (
 		Id        int       `json:"id"`
 		Username  string    `json:"username"`
 		CreatedAt time.Time `json:"createdAt"`
-		Balance   Accrual   `json:"balance"`
+		Balance   Amount    `json:"balance"`
 
 		Password string
 	}
 
 	UserBalance struct {
-		Current   Accrual `json:"current"`
-		Withdrawn int     `json:"withdrawn"`
+		Current   Amount `json:"current"`
+		Withdrawn Amount `json:"withdrawn"`
 	}
 )
 

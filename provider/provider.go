@@ -14,7 +14,7 @@ type (
 	AccrualResponse struct {
 		Order   model.OrderId `json:"order"`
 		Status  model.Status  `json:"status"`
-		Accrual model.Accrual `json:"accrual"`
+		Accrual model.Amount  `json:"accrual"`
 	}
 
 	ErrAccrualResponse struct {
