@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/djokcik/gophermart/internal/model"
+	"github.com/djokcik/gophermart/provider"
 )
 
 //go:generate mockery --name=OrderRepository
@@ -15,9 +16,11 @@ type UserRepository interface {
 }
 
 type OrderRepository interface {
-	FindOrderById(ctx context.Context, id model.OrderId) (model.Order, error)
+	OrderById(ctx context.Context, id model.OrderId) (model.Order, error)
 	CreateOrder(ctx context.Context, order model.Order) error
-	FindOrdersByUserId(ctx context.Context, userId int) ([]model.Order, error)
+	OrdersByStatus(ctx context.Context, status model.Status) ([]model.Order, error)
+	OrdersByUserId(ctx context.Context, userId int) ([]model.Order, error)
+	UpdateForAccrual(ctx context.Context, order model.Order, accrual provider.AccrualResponse) error
 }
 
 var (

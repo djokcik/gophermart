@@ -19,6 +19,7 @@ type UserService interface {
 	CreateUser(ctx context.Context, login string, password string) error
 	GetUserByUsername(ctx context.Context, username string) (model.User, error)
 	GenerateToken(ctx context.Context, user model.User) (string, error)
+	GetBalance(ctx context.Context, user model.User) (model.UserBalance, error)
 }
 
 func NewUserService(cfg config.Config, repo storage.UserRepository) UserService {
@@ -28,6 +29,10 @@ func NewUserService(cfg config.Config, repo storage.UserRepository) UserService 
 type userService struct {
 	cfg  config.Config
 	repo storage.UserRepository
+}
+
+func (u userService) GetBalance(ctx context.Context, user model.User) (model.UserBalance, error) {
+	return model.UserBalance{Current: user.Balance}, nil
 }
 
 func (u userService) Authenticate(ctx context.Context, login string, password string) (string, error) {

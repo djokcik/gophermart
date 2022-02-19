@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+var (
+	ErrUnauthorized = errors.New("unauthorized")
+)
+
 func CreateToken(secretKey string, id int) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, model.Claims{
 		Id: id,
@@ -42,16 +46,16 @@ func ParseToken(accessToken string, secretKey string) (int, error) {
 
 func GetJwtTokenByAuthHeader(authHeader string) (string, error) {
 	if authHeader == "" {
-		return "", errors.New("unauthorized")
+		return "", ErrUnauthorized
 	}
 
 	headerParts := strings.Split(authHeader, " ")
 	if len(headerParts) != 2 {
-		return "", errors.New("unauthorized")
+		return "", ErrUnauthorized
 	}
 
 	if headerParts[0] != "Bearer" {
-		return "", errors.New("unauthorized")
+		return "", ErrUnauthorized
 	}
 
 	return headerParts[1], nil

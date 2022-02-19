@@ -36,10 +36,10 @@ func (r userRepository) CreateUser(ctx context.Context, user model.User) error {
 }
 
 func (r userRepository) UserByUsername(ctx context.Context, username string) (model.User, error) {
-	row := r.db.QueryRowContext(ctx, "SELECT id, password, created_at from users where username=$1", username)
+	row := r.db.QueryRowContext(ctx, "SELECT id, password, created_at, balance from users where username=$1", username)
 
 	user := model.User{Username: username}
-	err := row.Scan(&user.Id, &user.Password, &user.CreatedAt)
+	err := row.Scan(&user.Id, &user.Password, &user.CreatedAt, &user.Balance)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return model.User{}, storage.ErrNotFound
@@ -52,10 +52,10 @@ func (r userRepository) UserByUsername(ctx context.Context, username string) (mo
 }
 
 func (r userRepository) UserById(ctx context.Context, id int) (model.User, error) {
-	row := r.db.QueryRowContext(ctx, "SELECT username, password, created_at from users where id=$1", id)
+	row := r.db.QueryRowContext(ctx, "SELECT username, password, created_at, balance from users where id=$1", id)
 
 	user := model.User{Id: id}
-	err := row.Scan(&user.Username, &user.Password, &user.CreatedAt)
+	err := row.Scan(&user.Username, &user.Password, &user.CreatedAt, &user.Balance)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return model.User{}, storage.ErrNotFound

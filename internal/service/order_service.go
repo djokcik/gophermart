@@ -8,6 +8,7 @@ import (
 	"github.com/djokcik/gophermart/internal/storage"
 	appContext "github.com/djokcik/gophermart/pkg/context"
 	"github.com/djokcik/gophermart/pkg/logging"
+	"github.com/djokcik/gophermart/provider"
 	"github.com/rs/zerolog"
 )
 
@@ -15,7 +16,9 @@ import (
 
 type OrderService interface {
 	ProcessOrder(ctx context.Context, orderId model.OrderId) error
-	FindOrdersByUser(ctx context.Context, userId int) ([]model.Order, error)
+	OrdersByUser(ctx context.Context, userId int) ([]model.Order, error)
+	OrdersByStatus(ctx context.Context, status model.Status) ([]model.Order, error)
+	UpdateForAccrual(ctx context.Context, order model.Order, accrual provider.AccrualResponse) error
 }
 
 func NewOrderService(cfg config.Config, repo storage.OrderRepository) OrderService {
@@ -27,10 +30,24 @@ type orderService struct {
 	repo storage.OrderRepository
 }
 
-func (o orderService) FindOrdersByUser(ctx context.Context, userId int) ([]model.Order, error) {
-	orders, err := o.repo.FindOrdersByUserId(ctx, userId)
+func (o orderService) UpdateForAccrual(ctx context.Context, order model.Order, accrual provider.AccrualResponse) error {
+	return o.repo.UpdateForAccrual(ctx, order, accrual)
+}
+
+func (o orderService) OrdersByStatus(ctx context.Context, status model.Status) ([]model.Order, error) {
+	orders, err := o.repo.OrdersByStatus(ctx, status)
 	if err != nil {
-		o.Log(ctx).Err(err).Msg("")
+		o.Log(ctx).Err(err).Msg("OrdersByStatus:")
+		return nil, err
+	}
+
+	return orders, nil
+}
+
+func (o orderService) OrdersByUser(ctx context.Context, userId int) ([]model.Order, error) {
+	orders, err := o.repo.OrdersByUserId(ctx, userId)
+	if err != nil {
+		o.Log(ctx).Err(err).Msg("OrdersByUser:")
 		return nil, err
 	}
 
@@ -44,7 +61,7 @@ func (o orderService) ProcessOrder(ctx context.Context, orderId model.OrderId) e
 		return ErrNotAuthenticated
 	}
 
-	order, err := o.repo.FindOrderById(ctx, orderId)
+	order, err := o.repo.OrderById(ctx, orderId)
 	if err == nil {
 		if user.Id == order.UserId {
 			o.Log(ctx).Trace().Err(ErrOrderAlreadyUploaded).Msg("")

@@ -8,27 +8,35 @@ import (
 
 var ErrInvalidAccessToken = errors.New("invalid auth token")
 
-type Claims struct {
-	jwt.StandardClaims
-	Id int
-}
+type (
+	Claims struct {
+		jwt.StandardClaims
+		Id int
+	}
 
-type UserRequestDto struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
-}
+	UserRequestDto struct {
+		Login    string `json:"login"`
+		Password string `json:"password"`
+	}
 
-type UserResponseDto struct {
-	Token string `json:"token"`
-}
+	UserResponseDto struct {
+		Token string `json:"token"`
+	}
 
-type User struct {
-	Id        int       `json:"id"`
-	Username  string    `json:"username"`
-	CreatedAt time.Time `json:"createdAt"`
+	User struct {
+		Id        int       `json:"id"`
+		Username  string    `json:"username"`
+		CreatedAt time.Time `json:"createdAt"`
+		Balance   Accrual   `json:"balance"`
 
-	Password string
-}
+		Password string
+	}
+
+	UserBalance struct {
+		Current   Accrual `json:"current"`
+		Withdrawn int     `json:"withdrawn"`
+	}
+)
 
 func (u User) Validate() error {
 	if len(u.Username) < 3 || len(u.Username) > 20 {

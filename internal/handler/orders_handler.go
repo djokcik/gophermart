@@ -67,19 +67,23 @@ func (h *Handler) GetOrdersHandler() http.HandlerFunc {
 			return
 		}
 
-		orders, err := h.order.FindOrdersByUser(ctx, user.Id)
+		orders, err := h.order.OrdersByUser(ctx, user.Id)
 		if err != nil {
 			h.Log(ctx).Err(err).Msg("invalid find users")
 			http.Error(rw, "internal error", http.StatusInternalServerError)
 			return
 		}
 
-		rw.Header().Set("Content-Type", "application/json")
-
 		h.Log(ctx).Info().Msg("get orders handled")
 
-		bytes, _ := json.Marshal(orders)
+		if len(orders) == 0 {
+			rw.WriteHeader(http.StatusNoContent)
+			return
+		}
 
+		rw.Header().Set("Content-Type", "application/json")
+
+		bytes, _ := json.Marshal(orders)
 		rw.Write(bytes)
 	}
 }

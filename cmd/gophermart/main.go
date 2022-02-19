@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"github.com/djokcik/gophermart/internal/config"
+	"github.com/djokcik/gophermart/internal/reporegistry"
+	"github.com/djokcik/gophermart/internal/service"
+	helpers "github.com/djokcik/gophermart/pkg/helper"
 	"github.com/djokcik/gophermart/pkg/logging"
 	serverMiddleware "github.com/djokcik/gophermart/pkg/middleware"
 	"github.com/go-chi/chi/v5"
@@ -11,6 +14,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -31,7 +35,16 @@ func main() {
 	mux.Use(serverMiddleware.GzipHandle)
 	mux.Use(serverMiddleware.LoggerMiddleware())
 
-	makeMetricRoutes(ctx, mux, cfg)
+	repoRegistry, err := reporegistry.NewPostgreSQL(ctx, cfg)
+	if err != nil {
+		logging.NewLogger().Fatal().Err(err).Msgf("Doesn`t open database connection")
+		os.Exit(1)
+	}
+
+	accrualService := service.NewAccrualService(cfg, repoRegistry)
+	go helpers.SetTicker(accrualService.Poller(ctx), 5*time.Second)
+
+	makeMetricRoutes(ctx, mux, cfg, repoRegistry)
 
 	go func() {
 		err := http.ListenAndServe(cfg.Address, mux)

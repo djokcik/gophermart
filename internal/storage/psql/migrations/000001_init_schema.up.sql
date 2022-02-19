@@ -1,17 +1,24 @@
-CREATE TYPE "order_status" AS ENUM (
-    'NEW',
-    'REGISTERED',
-    'PROCESSING',
-    'PROCESSED',
-    'INVALID'
-);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status') THEN
+        CREATE TYPE "order_status" AS ENUM (
+            'NEW',
+            'PROCESSING',
+            'PROCESSED',
+            'INVALID'
+        );
+    END IF;
+END$$;
+
+
 
 create table users
 (
     id serial not null,
     username varchar(50) not null,
     password varchar(255) not null,
-    created_at timestamp default current_timestamp
+    created_at timestamp default current_timestamp,
+    balance int default 0 not null
 );
 
 create unique index users_id_uindex

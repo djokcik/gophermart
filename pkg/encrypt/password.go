@@ -11,8 +11,6 @@ func HashAndSalt(pwd string, pepper string) (string, error) {
 		return "", fmt.Errorf("bcryptPassword: %w", err)
 	}
 
-	fmt.Println(pwd, pepper, string(hash))
-
 	return string(hash), nil
 }
 
