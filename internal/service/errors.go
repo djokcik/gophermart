@@ -3,6 +3,7 @@ package service
 import "errors"
 
 var (
+	ErrUnauthorized  = errors.New("unauthorized")
 	ErrWrongPassword = errors.New("authenticate: invalid username or password")
 
 	ErrNotAuthenticated                = errors.New("service: no authenticted user found in the context")

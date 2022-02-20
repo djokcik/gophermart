@@ -35,7 +35,7 @@ func (h *Handler) UploadOrderHandler() http.HandlerFunc {
 		if err != nil {
 			if errors.Is(err, service.ErrOrderAlreadyUploadedAnotherUser) {
 				logger.Trace().Err(err).Msg("")
-				http.Error(rw, "invalid orderID", http.StatusConflict)
+				http.Error(rw, "order already uploaded", http.StatusConflict)
 				return
 			}
 

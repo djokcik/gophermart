@@ -4,14 +4,14 @@ import (
 	"github.com/djokcik/gophermart/internal/config"
 	"github.com/djokcik/gophermart/internal/handler"
 	"github.com/djokcik/gophermart/internal/model"
+	"github.com/djokcik/gophermart/internal/service"
 	"github.com/djokcik/gophermart/internal/storage"
 	"github.com/djokcik/gophermart/pkg/context"
-	"github.com/djokcik/gophermart/pkg/encrypt"
 	"github.com/djokcik/gophermart/pkg/logging"
 	"net/http"
 )
 
-func UserContext(userRepo storage.UserRepository, cfg config.Config) func(next http.Handler) http.Handler {
+func UserContext(userRepo storage.UserRepository, auth service.UserUtilsService, cfg config.Config) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -23,7 +23,7 @@ func UserContext(userRepo storage.UserRepository, cfg config.Config) func(next h
 
 			cookie, err := r.Cookie(handler.CookieName)
 			if err != nil {
-				token, err = encrypt.GetJwtTokenByAuthHeader(r.Header.Get("Authorization"))
+				token, err = auth.GetJwtTokenByAuthHeader(r.Header.Get("Authorization"))
 				if err != nil {
 					logger.Trace().Err(err).Msg("RequireUser: don`t have token")
 					http.Error(rw, "Unauthorized", http.StatusUnauthorized)
@@ -33,7 +33,7 @@ func UserContext(userRepo storage.UserRepository, cfg config.Config) func(next h
 				token = cookie.Value
 			}
 
-			id, err := encrypt.ParseToken(token, cfg.Key)
+			id, err := auth.ParseToken(token, cfg.Key)
 			if err != nil {
 				status := http.StatusBadRequest
 				if err == model.ErrInvalidAccessToken {

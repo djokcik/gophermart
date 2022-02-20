@@ -37,14 +37,6 @@ func (h *Handler) WithdrawHandler() http.HandlerFunc {
 			return
 		}
 
-		user := appContext.User(ctx)
-		if user == nil {
-			h.Log(ctx).Trace().Err(ErrNotAuthenticated).Msg("")
-			http.Error(rw, "user not found", http.StatusUnauthorized)
-
-			return
-		}
-
 		err = h.withdraw.ProcessWithdraw(ctx, withdrawDto.OrderID, withdrawDto.Sum)
 		if err != nil {
 			if errors.Is(err, storage.ErrInsufficientFunds) {

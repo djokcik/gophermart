@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"github.com/djokcik/gophermart/pkg/luhn"
+	"math"
 	"time"
 )
 
@@ -63,6 +64,6 @@ func (s *Amount) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	*s = Amount(val * 100)
+	*s = Amount(math.Round(val * 100))
 	return nil
 }

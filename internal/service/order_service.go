@@ -32,13 +32,19 @@ type orderService struct {
 }
 
 func (o orderService) UpdateForAccrual(ctx context.Context, order model.Order, accrual provider.AccrualResponse) error {
-	return o.repo.UpdateForAccrual(ctx, order, accrual)
+	err := o.repo.UpdateForAccrual(ctx, order, accrual)
+	if err != nil {
+		o.Log(ctx).Trace().Err(err).Msg("UpdateForAccrual:")
+		return err
+	}
+
+	return nil
 }
 
 func (o orderService) OrdersByStatus(ctx context.Context, status model.Status) ([]model.Order, error) {
 	orders, err := o.repo.OrdersByStatus(ctx, status)
 	if err != nil {
-		o.Log(ctx).Err(err).Msg("OrdersByStatus:")
+		o.Log(ctx).Error().Err(err).Msg("OrdersByStatus:")
 		return nil, err
 	}
 
@@ -79,10 +85,9 @@ func (o orderService) ProcessOrder(ctx context.Context, orderID model.OrderID) e
 	}
 
 	order = model.Order{
-		ID:      orderID,
-		UserID:  user.ID,
-		Status:  model.StatusNew,
-		Accrual: 0,
+		ID:     orderID,
+		UserID: user.ID,
+		Status: model.StatusNew,
 	}
 
 	err = o.repo.CreateOrder(ctx, order)

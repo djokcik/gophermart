@@ -11,6 +11,8 @@ import (
 	"github.com/rs/zerolog"
 )
 
+//go:generate mockery --name=AccrualService
+
 type AccrualService interface {
 	Poller(ctx context.Context) func()
 }
@@ -18,7 +20,6 @@ type AccrualService interface {
 func NewAccrualService(cfg config.Config, registry reporegistry.RepoRegistry) AccrualService {
 	return &accrualService{
 		client: provider.NewAccrualClient(cfg),
-		user:   NewUserService(cfg, registry),
 		order:  NewOrderService(cfg, registry),
 	}
 }
@@ -26,7 +27,6 @@ func NewAccrualService(cfg config.Config, registry reporegistry.RepoRegistry) Ac
 type accrualService struct {
 	client provider.AccrualClient
 	order  OrderService
-	user   UserService
 }
 
 func (a accrualService) Poller(ctx context.Context) func() {
