@@ -2,7 +2,6 @@ package model
 
 import (
 	"errors"
-	"time"
 )
 
 var (
@@ -16,11 +15,11 @@ type (
 	}
 
 	Withdraw struct {
-		ID          int       `json:"-"`
-		OrderID     OrderID   `json:"order"`
-		Sum         Amount    `json:"sum"`
-		ProcessedAt time.Time `json:"processed_at"`
-		UserID      int       `json:"-"`
+		ID          int          `json:"-"`
+		OrderID     OrderID      `json:"order"`
+		Sum         Amount       `json:"sum"`
+		ProcessedAt UploadedTime `json:"processed_at"`
+		UserID      int          `json:"-"`
 	}
 )
 

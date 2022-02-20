@@ -5,6 +5,7 @@ import (
 	"github.com/djokcik/gophermart/internal/config"
 	"github.com/djokcik/gophermart/internal/handler"
 	"github.com/djokcik/gophermart/internal/reporegistry"
+	"github.com/djokcik/gophermart/internal/service"
 	"github.com/djokcik/gophermart/pkg/middleware"
 	"github.com/go-chi/chi/v5"
 )
@@ -17,7 +18,7 @@ func makeMetricRoutes(_ context.Context, mux *chi.Mux, cfg config.Config, regist
 		r.Post("/login", h.SignInHandler())
 
 		r.Route("/", func(r chi.Router) {
-			r.Use(middleware.UserContext(registry.GetUserRepo(), cfg))
+			r.Use(middleware.UserContext(registry.GetUserRepo(), service.NewAuthService(), cfg))
 
 			r.Post("/orders", h.UploadOrderHandler())
 			r.Get("/orders", h.GetOrdersHandler())

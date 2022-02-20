@@ -7,7 +7,6 @@ import (
 	"github.com/djokcik/gophermart/internal/model"
 	"github.com/djokcik/gophermart/internal/reporegistry"
 	"github.com/djokcik/gophermart/internal/storage"
-	"github.com/djokcik/gophermart/pkg/encrypt"
 	"github.com/djokcik/gophermart/pkg/logging"
 	"github.com/rs/zerolog"
 	"golang.org/x/crypto/bcrypt"
@@ -24,13 +23,19 @@ type UserService interface {
 }
 
 func NewUserService(cfg config.Config, registry reporegistry.RepoRegistry) UserService {
-	return &userService{cfg: cfg, repo: registry.GetUserRepo(), withdrawRepo: registry.GetWithdrawRepo()}
+	return &userService{
+		cfg:          cfg,
+		repo:         registry.GetUserRepo(),
+		withdrawRepo: registry.GetWithdrawRepo(),
+		auth:         NewAuthService(),
+	}
 }
 
 type userService struct {
 	cfg          config.Config
 	repo         storage.UserRepository
 	withdrawRepo storage.WithdrawRepository
+	auth         AuthService
 }
 
 func (u userService) GetBalance(ctx context.Context, user model.User) (model.UserBalance, error) {
@@ -54,7 +59,7 @@ func (u userService) Authenticate(ctx context.Context, login string, password st
 		return "", err
 	}
 
-	if err := encrypt.CompareHashAndPassword(password+u.cfg.PasswordPepper, user.Password); err != nil {
+	if err := u.auth.CompareHashAndPassword(password+u.cfg.PasswordPepper, user.Password); err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 			u.Log(ctx).Trace().Err(err).Msg("authenticate: wrong password")
 			return "", ErrWrongPassword
@@ -79,7 +84,7 @@ func (u userService) CreateUser(ctx context.Context, login string, password stri
 		return err
 	}
 
-	user.Password, err = encrypt.HashAndSalt(user.Password, u.cfg.PasswordPepper)
+	user.Password, err = u.auth.HashAndSalt(user.Password, u.cfg.PasswordPepper)
 	if err != nil {
 		u.Log(ctx).Trace().Err(err).Msgf("error create hash")
 		return err
@@ -108,7 +113,7 @@ func (u userService) GetUserByUsername(ctx context.Context, username string) (mo
 }
 
 func (u userService) GenerateToken(ctx context.Context, user model.User) (string, error) {
-	token, err := encrypt.CreateToken(u.cfg.Key, user.ID)
+	token, err := u.auth.CreateToken(u.cfg.Key, user.ID)
 	if err != nil {
 		u.Log(ctx).Err(err).Msgf("error create token")
 		return "", err

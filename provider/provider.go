@@ -6,6 +6,8 @@ import (
 	"github.com/djokcik/gophermart/internal/model"
 )
 
+//go:generate mockery --name=AccrualClient
+
 type (
 	AccrualClient interface {
 		GetOrder(ctx context.Context, orderID model.OrderID) (AccrualResponse, error)
